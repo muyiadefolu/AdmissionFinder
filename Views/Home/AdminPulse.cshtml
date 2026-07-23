@@ -1,0 +1,295 @@
+@{
+    ViewData["Title"] = "Institutional Pulse — Admin";
+    ViewData["Description"] = "Admin dashboard tracking applicant flow, cut-off shifts, program demand, and institution health across AdmissionFinder.";
+    ViewData["BodyClass"] = "";
+}
+
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex w-64 shrink-0 flex-col bg-surface-container-lowest border-r border-outline-variant">
+    <div class="px-6 py-5 border-b border-outline-variant">
+      <a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
+      <p class="text-label-sm text-on-surface-variant mt-1">Admin Console</p>
+    </div>
+    <nav class="p-3 flex-1 space-y-1 text-body-sm" id="nav">
+      <a class="nav-item active flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer" data-view="overview">
+        <span class="material-symbols-outlined text-lg">monitoring</span> Institutional Pulse</a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-lg">school</span> Institutions</a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-lg">group</span> Applicants</a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-lg">insights</span> Reports</a>
+      <a class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined text-lg">settings</span> Settings</a>
+    </nav>
+    <div class="p-4 border-t border-outline-variant flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-secondary text-white flex items-center justify-center font-bold">AA</div>
+      <div class="text-body-sm">
+        <p class="font-semibold text-primary">Ada Admin</p>
+        <p class="text-on-surface-variant text-label-sm">Regional lead</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Topbar -->
+    <header class="bg-surface-container-lowest border-b border-outline-variant px-6 py-4 flex items-center gap-4 justify-between">
+      <div class="min-w-0">
+        <p class="text-label-sm text-on-surface-variant uppercase tracking-wide">Dashboard</p>
+        <h1 class="text-headline-md text-primary truncate">Institutional Pulse</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="range" class="py-2 px-3 rounded-lg border border-outline-variant bg-surface text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+        <button class="hidden sm:inline-flex items-center gap-2 bg-secondary text-white px-4 py-2 rounded-lg text-label-md hover:bg-primary transition-colors">
+          <span class="material-symbols-outlined text-base">download</span> Export
+        </button>
+        <span class="material-symbols-outlined text-on-surface-variant cursor-pointer">notifications</span>
+      </div>
+    </header>
+
+    <main class="p-6 space-y-6 max-w-container-max mx-auto w-full">
+
+      <!-- KPI grid -->
+      <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" id="kpis"></section>
+
+      <!-- Charts row -->
+      <section class="grid gap-4 lg:grid-cols-3">
+        <div class="card p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-headline-sm text-primary">Applications over time</h2>
+              <p class="text-body-sm text-on-surface-variant">Daily submissions across all institutions</p>
+            </div>
+            <span class="chip chip-up"><span class="material-symbols-outlined text-sm">trending_up</span> +12.4%</span>
+          </div>
+          <svg id="lineChart" viewBox="0 0 600 220" class="w-full h-56"></svg>
+        </div>
+        <div class="card p-5">
+          <h2 class="text-headline-sm text-primary mb-1">Program demand</h2>
+          <p class="text-body-sm text-on-surface-variant mb-4">Share of applications this period</p>
+          <div class="flex items-center gap-6">
+            <svg id="donut" viewBox="0 0 120 120" class="w-32 h-32"></svg>
+            <ul id="donutLegend" class="text-body-sm space-y-2 flex-1"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Institution table + alerts -->
+      <section class="grid gap-4 lg:grid-cols-3">
+        <div class="card lg:col-span-2 overflow-hidden">
+          <div class="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
+            <div>
+              <h2 class="text-headline-sm text-primary">Institution health</h2>
+              <p class="text-body-sm text-on-surface-variant">Sorted by applicant volume</p>
+            </div>
+            <div class="relative hidden sm:block">
+              <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+              <input id="tblSearch" placeholder="Filter\u2026" class="pl-8 pr-3 py-1.5 rounded-lg border border-outline-variant text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40"/>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-body-sm">
+              <thead class="bg-surface-container-low text-label-md text-on-surface-variant">
+                <tr>
+                  <th class="px-5 py-3">Institution</th>
+                  <th class="px-5 py-3">Applicants</th>
+                  <th class="px-5 py-3">Cut-off shift</th>
+                  <th class="px-5 py-3">Trend</th>
+                  <th class="px-5 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="instTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h2 class="text-headline-sm text-primary mb-1">Live alerts</h2>
+          <p class="text-body-sm text-on-surface-variant mb-4">Signals worth reviewing today</p>
+          <ul id="alerts" class="space-y-3"></ul>
+        </div>
+      </section>
+
+      <div class="pt-4">
+        <a href="/" class="text-secondary font-semibold inline-flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">arrow_back</span> Back to site
+        </a>
+      </div>
+    </main>
+  </div>
+</div>
+
+@section Styles {
+    <style>
+        body { font-family: Inter, system-ui, sans-serif; background:#eff4ff; }
+        .card { background:#fff; border:1px solid #c4c6cf; border-radius:12px; }
+        .chip { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .5rem; border-radius:9999px; font-size:12px; font-weight:600; }
+        .chip-up   { background:#dcfce7; color:#166534; }
+        .chip-down { background:#fee2e2; color:#991b1b; }
+        .chip-flat { background:#e5eeff; color:#0051d5; }
+        .bar { height:8px; border-radius:9999px; background:#e5eeff; overflow:hidden; }
+        .bar > span { display:block; height:100%; background: linear-gradient(90deg,#0051d5,#316bf3); }
+        .nav-item.active { background:#e5eeff; color:#0051d5; }
+        .spark { display:block; width:100%; height:44px; }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        var KPIS = [
+            { label:"Active applicants",   value:"48,213", delta:"+8.2%",  dir:"up",   icon:"group" },
+            { label:"Applications (30d)",  value:"126,904", delta:"+12.4%", dir:"up",   icon:"description" },
+            { label:"Avg. cut-off",        value:"214",    delta:"-3 pts", dir:"down", icon:"trending_down" },
+            { label:"At-risk institutions",value:"7",      delta:"+2",     dir:"down", icon:"warning" },
+        ];
+
+        var INSTS = [
+            { name:"University of Ibadan",         applicants:12480, shift:+6, trend:"up",   status:"Healthy" },
+            { name:"University of Lagos",          applicants:11020, shift:+4, trend:"up",   status:"Healthy" },
+            { name:"Obafemi Awolowo University",   applicants: 8640, shift:+1, trend:"flat", status:"Healthy" },
+            { name:"Ahmadu Bello University",      applicants: 7820, shift:-2, trend:"down", status:"Watch" },
+            { name:"University of Nigeria, Nsukka",applicants: 6910, shift: 0, trend:"flat", status:"Healthy" },
+            { name:"Covenant University",          applicants: 5340, shift:-5, trend:"down", status:"At risk" },
+            { name:"Federal University of Tech.",  applicants: 4720, shift:+3, trend:"up",   status:"Healthy" },
+        ];
+
+        var PROGRAMS = [
+            { name:"Computer Science", pct:28, color:"#0051d5" },
+            { name:"Medicine",         pct:22, color:"#00754a" },
+            { name:"Business",         pct:18, color:"#b45309" },
+            { name:"Engineering",      pct:17, color:"#7c3aed" },
+            { name:"Law",              pct:15, color:"#dc2626" },
+        ];
+
+        var ALERTS = [
+            { icon:"warning", tone:"warn", title:"Covenant University applicants down 12%", meta:"vs. last week" },
+            { icon:"trending_up", tone:"success", title:"CS demand up 6% nationwide", meta:"Since Monday" },
+            { icon:"schedule", tone:"secondary", title:"Cut-off review window closes Friday", meta:"3 institutions pending" },
+            { icon:"verified", tone:"success", title:"UNILAG verified 2,341 new applications", meta:"Auto-checked" },
+        ];
+
+        var $ = function(s) { return document.querySelector(s); };
+
+        $("#kpis").innerHTML = KPIS.map(function(k) {
+            return '<div class="card p-5">' +
+              '<div class="flex items-start justify-between">' +
+                '<div>' +
+                  '<p class="text-label-sm text-on-surface-variant uppercase tracking-wide">' + k.label + '</p>' +
+                  '<p class="text-display-md text-primary mt-1">' + k.value + '</p>' +
+                '</div>' +
+                '<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">' +
+                  '<span class="material-symbols-outlined">' + k.icon + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="mt-4"><span class="chip ' + (k.dir==='up'?'chip-up':k.dir==='down'?'chip-down':'chip-flat') + '">' +
+                '<span class="material-symbols-outlined text-sm">' + (k.dir==='up'?'trending_up':k.dir==='down'?'trending_down':'trending_flat') + '</span>' + k.delta +
+              '</span> <span class="text-body-sm text-on-surface-variant ml-2">vs. previous period</span></div>' +
+            '</div>';
+        }).join("");
+
+        function drawLine(days) {
+            var svg = $("#lineChart");
+            var W = 600, H = 220, pad = 30;
+            var seed = days * 7;
+            var rand = function() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+            var pts = Array.from({length: days}, function(_,i) { return 400 + Math.round(rand()*600) + i*4; });
+            var max = Math.max.apply(null, pts), min = Math.min.apply(null, pts);
+            var xStep = (W - pad*2) / (pts.length - 1);
+            var y = function(v) { return H - pad - ((v - min) / (max - min || 1)) * (H - pad*2); };
+            var d = pts.map(function(v,i) { return (i===0?'M':'L') + (pad + i*xStep).toFixed(1) + ',' + y(v).toFixed(1); }).join(" ");
+            var area = d + ' L' + (W-pad).toFixed(1) + ',' + (H-pad) + ' L' + pad + ',' + (H-pad) + ' Z';
+            svg.innerHTML = [
+                '<defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">',
+                '<stop offset="0%" stop-color="#0051d5" stop-opacity=".35"/>',
+                '<stop offset="100%" stop-color="#0051d5" stop-opacity="0"/>',
+                '</linearGradient></defs>',
+                [0,1,2,3].map(function(i) {
+                    var yy = pad + i*((H-pad*2)/3);
+                    return '<line x1="' + pad + '" x2="' + (W-pad) + '" y1="' + yy + '" y2="' + yy + '" stroke="#e5eeff"/>';
+                }).join(""),
+                '<path d="' + area + '" fill="url(#lg)"/>',
+                '<path d="' + d + '" fill="none" stroke="#0051d5" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>',
+                pts.map(function(v,i) {
+                    return i%Math.ceil(pts.length/6)===0
+                        ? '<circle cx="' + (pad+i*xStep).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="3" fill="#0051d5"/>'
+                        : "";
+                }).join("")
+            ].join("");
+        }
+
+        function drawDonut() {
+            var svg = $("#donut");
+            var cx=60, cy=60, r=44, C = 2*Math.PI*r;
+            var offset = 0;
+            var segs = PROGRAMS.map(function(p) {
+                var len = (p.pct/100) * C;
+                var el = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + p.color + '" stroke-width="16"' +
+                  ' stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"/>';
+                offset += len; return el;
+            }).join("");
+            svg.innerHTML = segs + '<text x="60" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="#002045">100%</text>' +
+              '<text x="60" y="74" text-anchor="middle" font-size="10" fill="#43474e">of apps</text>';
+            $("#donutLegend").innerHTML = PROGRAMS.map(function(p) {
+                return '<li class="flex items-center justify-between gap-3"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:' + p.color + '"></span>' + p.name + '</span><span class="text-on-surface-variant">' + p.pct + '%</span></li>';
+            }).join("");
+        }
+
+        function drawTable(filter) {
+            filter = filter || "";
+            var q = filter.trim().toLowerCase();
+            var max = Math.max.apply(null, INSTS.map(function(i) { return i.applicants; }));
+            var rows = INSTS.filter(function(i) { return !q || i.name.toLowerCase().includes(q); }).map(function(i) {
+                var chip = i.status==="Healthy" ? "chip-up" : i.status==="Watch" ? "chip-flat" : "chip-down";
+                var shift = i.shift>0 ? '<span class="text-success font-semibold">+' + i.shift + '</span>'
+                            : i.shift<0 ? '<span class="text-error font-semibold">' + i.shift + '</span>'
+                            : '<span class="text-on-surface-variant">\u00B10</span>';
+                var trendIcon = i.trend==="up"?"trending_up":i.trend==="down"?"trending_down":"trending_flat";
+                var trendColor = i.trend==="up"?"#00754a":i.trend==="down"?"#ba1a1a":"#43474e";
+                return '<tr class="border-t border-outline-variant hover:bg-surface-container-low">' +
+                  '<td class="px-5 py-3 text-primary font-semibold">' + i.name + '</td>' +
+                  '<td class="px-5 py-3"><div class="flex items-center gap-3"><div class="bar w-24"><span style="width:' + (i.applicants/max*100).toFixed(0) + '%"></span></div><span>' + i.applicants.toLocaleString() + '</span></div></td>' +
+                  '<td class="px-5 py-3">' + shift + '</td>' +
+                  '<td class="px-5 py-3"><span class="material-symbols-outlined" style="color:' + trendColor + '">' + trendIcon + '</span></td>' +
+                  '<td class="px-5 py-3"><span class="chip ' + chip + '">' + i.status + '</span></td>' +
+                '</tr>';
+            }).join("");
+            $("#instTable").innerHTML = rows || '<tr><td colspan="5" class="px-5 py-6 text-center text-on-surface-variant">No matches</td></tr>';
+        }
+
+        $("#alerts").innerHTML = ALERTS.map(function(a) {
+            var bg = a.tone==="warn" ? "#fef3c7" : a.tone==="success" ? "#dcfce7" : "#e5eeff";
+            var fg = a.tone==="warn" ? "#b45309" : a.tone==="success" ? "#166534" : "#0051d5";
+            return '<li class="flex gap-3 items-start">' +
+              '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style="background:' + bg + ';color:' + fg + '">' +
+                '<span class="material-symbols-outlined text-lg">' + a.icon + '</span>' +
+              '</div>' +
+              '<div class="min-w-0">' +
+                '<p class="text-body-sm text-primary font-semibold">' + a.title + '</p>' +
+                '<p class="text-label-sm text-on-surface-variant">' + a.meta + '</p>' +
+              '</div>' +
+            '</li>';
+        }).join("");
+
+        document.querySelectorAll("#nav .nav-item").forEach(function(el) {
+            el.addEventListener("click", function() {
+                document.querySelectorAll("#nav .nav-item").forEach(function(n) { n.classList.remove("active","text-secondary"); });
+                document.querySelectorAll("#nav .nav-item").forEach(function(n) { n.classList.add("text-on-surface-variant"); });
+                el.classList.add("active"); el.classList.remove("text-on-surface-variant");
+            });
+        });
+
+        $("#range").addEventListener("change", function(e) { drawLine(parseInt(e.target.value,10)); });
+        var tblSearch = $("#tblSearch");
+        if (tblSearch) {
+            tblSearch.addEventListener("input", function(e) { drawTable(e.target.value); });
+        }
+
+        drawLine(30); drawDonut(); drawTable();
+    </script>
+}
