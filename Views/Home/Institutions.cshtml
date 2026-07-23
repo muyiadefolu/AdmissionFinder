@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Institution Directory";
+    ViewData["Description"] = "Browse all Nigerian higher institutions including Federal, State, Private universities, Polytechnics, and Colleges of Education.";
+}
+
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/">Explore schools</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/cutoff">Check cut-off</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/compare">Compare</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/career">Career guide</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-body-md text-secondary font-bold border-b-2 border-secondary pb-1" href="/institutions">Institutions</a>
+</div>
+</div>
+</header>
+
+<main class="max-w-container-max mx-auto px-margin-desktop py-10">
+<div class="mb-8">
+<p class="text-label-md text-secondary uppercase tracking-wide mb-2">Directory</p>
+<h1 class="text-headline-lg md:text-display-md text-primary font-bold mb-3">All Institutions</h1>
+<p class="text-body-lg text-on-surface-variant">Browse Federal, State, Private universities, Polytechnics, and Colleges of Education.</p>
+</div>
+
+<!-- Filters -->
+<div class="flex flex-wrap gap-3 mb-6">
+<input id="searchInput" type="text" placeholder="Search by name, state or type..." class="flex-1 min-w-[200px] px-4 py-2.5 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 text-body-sm" />
+<select id="typeFilter" class="py-2.5 px-3 rounded-lg border border-outline-variant bg-surface text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40">
+<option value="">All types</option>
+<option>Federal</option>
+<option>State</option>
+<option>Private</option>
+<option>Polytechnic</option>
+<option>College of Education</option>
+</select>
+</div>
+
+<div id="institutionsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+<div id="emptyMsg" class="hidden text-center py-16 text-on-surface-variant">
+<span class="material-symbols-outlined text-5xl mb-3">search_off</span>
+<p class="text-body-md">No institutions match your filters.</p>
+</div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            var AF = window.AdmissionFinder;
+            var grid = document.getElementById("institutionsGrid");
+            var emptyMsg = document.getElementById("emptyMsg");
+            var searchInput = document.getElementById("searchInput");
+            var typeFilter = document.getElementById("typeFilter");
+
+            function render() {
+                var q = searchInput.value.trim().toLowerCase();
+                var type = typeFilter.value;
+                var filtered = AF.institutions.filter(function (i) {
+                    if (type && i.type !== type) return false;
+                    if (q && i.name.toLowerCase().indexOf(q) < 0 && i.state.toLowerCase().indexOf(q) < 0) return false;
+                    return true;
+                });
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = "";
+                    emptyMsg.classList.remove("hidden");
+                    return;
+                }
+                emptyMsg.classList.add("hidden");
+
+                grid.innerHTML = filtered.map(function (i) {
+                    var initials = i.name.split(" ").map(function (w) { return w[0]; }).slice(0, 2).join("");
+                    var courseCount = 0;
+                    if (AF.cutoffs[i.id]) {
+                        courseCount = Object.keys(AF.cutoffs[i.id]).length;
+                    }
+                    return '<a href="/institution/' + i.id + '" class="block bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:shadow-md transition-all hover:border-secondary">' +
+                        '<div class="flex items-start gap-3 mb-3">' +
+                        '<div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-white font-bold text-sm shrink-0">' + initials + '</div>' +
+                        '<div class="min-w-0">' +
+                        '<h3 class="font-headline-sm text-headline-sm text-primary truncate">' + i.name + '</h3>' +
+                        '<p class="text-body-sm text-on-surface-variant">' + i.state + ' &bull; ' + i.type + '</p>' +
+                        '</div></div>' +
+                        '<div class="flex items-center gap-3 text-label-sm text-on-surface-variant">' +
+                        '<span>' + courseCount + ' courses</span>' +
+                        '<span class="chip ' + (i.accreditation === "Full" ? "chip-up" : "chip-flat") + '">' + i.accreditation + '</span>' +
+                        '</div></a>';
+                }).join("");
+            }
+
+            searchInput.addEventListener("input", render);
+            typeFilter.addEventListener("change", render);
+            render();
+        })();
+    </script>
+}

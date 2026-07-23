@@ -3,34 +3,29 @@
     ViewData["Description"] = "Compare universities and colleges side-by-side on cut-offs, tuition, acceptance rates, campus life, and outcomes.";
 }
 
-<!-- Header -->
 <header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-50">
   <div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
     <div class="flex items-center gap-8">
       <a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
       <nav class="hidden md:flex items-center gap-6">
         <a class="text-body-md text-on-surface-variant hover:text-secondary" href="/">Explore schools</a>
-        <a class="text-body-md text-on-surface-variant hover:text-secondary" href="#">Check cut-off</a>
+        <a class="text-body-md text-on-surface-variant hover:text-secondary" href="/cutoff">Check cut-off</a>
         <a class="text-body-md text-secondary font-bold border-b-2 border-secondary pb-1" href="/compare">Compare</a>
-        <a class="text-body-md text-on-surface-variant hover:text-secondary" href="#">Career guide</a>
+        <a class="text-body-md text-on-surface-variant hover:text-secondary" href="/career">Career guide</a>
       </nav>
     </div>
     <div class="flex items-center gap-4">
-      <span class="text-body-md text-on-surface-variant hidden sm:inline cursor-pointer hover:text-secondary">Help</span>
-      <button class="bg-secondary-container text-on-secondary-container px-5 py-2 rounded-lg text-label-md hover:bg-secondary transition-colors shadow-sm">Create account</button>
-      <span class="material-symbols-outlined text-on-surface-variant text-2xl cursor-pointer">account_circle</span>
+      <a class="text-body-md text-on-surface-variant hover:text-secondary" href="/institutions">Institutions</a>
     </div>
   </div>
 </header>
 
 <main class="max-w-container-max mx-auto px-margin-desktop py-10">
-
-  <!-- Page header -->
-  <section class="mb-8">
+  <div class="mb-8">
     <p class="text-label-md text-secondary uppercase tracking-wide mb-2">Compare</p>
-    <h1 class="text-headline-lg md:text-display-lg text-primary font-bold mb-3">Compare institutions side-by-side</h1>
-    <p class="text-body-lg text-on-surface-variant max-w-2xl">Weigh cut-offs, tuition, acceptance rates, and outcomes across up to four schools before you decide where to apply.</p>
-  </section>
+    <h1 class="text-headline-lg md:text-display-md text-primary font-bold mb-3">Compare institutions side-by-side</h1>
+    <p class="text-body-lg text-on-surface-variant">Select up to 3 institutions and compare their attributes, cut-off marks, and more.</p>
+  </div>
 
   <!-- Add / Search bar -->
   <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 md:p-6 shadow-sm mb-8">
@@ -38,40 +33,29 @@
     <div class="flex flex-col md:flex-row gap-3">
       <div class="flex-1 relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-        <input id="search" type="text" placeholder="Search by name, e.g. University of Ibadan"
+        <input id="search" type="text" placeholder="Search by name..."
           class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary" />
       </div>
-      <select id="programFilter" class="py-3 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40">
-        <option value="">All programs</option>
-        <option>Computer Science</option>
-        <option>Medicine</option>
-        <option>Business</option>
-        <option>Law</option>
-        <option>Engineering</option>
-      </select>
       <button id="addBtn" class="bg-secondary text-white px-6 py-3 rounded-lg text-label-md hover:bg-primary transition-colors shadow-sm inline-flex items-center gap-2">
         <span class="material-symbols-outlined text-lg">add</span> Add to compare
       </button>
     </div>
-    <p class="text-body-sm text-on-surface-variant mt-3">Compare up to 4 institutions. Click any card to remove it.</p>
+    <p class="text-body-sm text-on-surface-variant mt-3">Compare up to 3 institutions. Click any card to remove it.</p>
   </section>
 
   <!-- Selected cards -->
-  <section id="cards" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10"></section>
+  <section id="cards" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-10"></section>
 
   <!-- Comparison table -->
   <section class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant">
       <h2 class="text-headline-sm text-primary">Side-by-side breakdown</h2>
-      <div class="hidden sm:flex items-center gap-2 text-body-sm text-on-surface-variant">
-        <span class="material-symbols-outlined text-base">bolt</span> Live from AdmissionFinder data
-      </div>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead class="bg-surface-container-low">
           <tr id="tblHead">
-            <th class="px-6 py-3 text-label-md text-on-surface-variant">Attribute</th>
+            <th class="px-6 py-3 text-label-md text-on-surface-variant sticky left-0 bg-surface-container-low">Attribute</th>
           </tr>
         </thead>
         <tbody id="tblBody" class="text-body-md"></tbody>
@@ -79,7 +63,7 @@
     </div>
   </section>
 
-  <div class="mt-8 flex flex-wrap gap-3">
+  <div class="mt-6 flex flex-wrap gap-3">
     <button id="clearAll" class="border border-outline-variant text-primary px-5 py-2.5 rounded-lg hover:bg-surface-container transition">Clear all</button>
     <a href="/" class="text-secondary font-semibold inline-flex items-center gap-1 px-2 py-2.5">
       <span class="material-symbols-outlined text-base">arrow_back</span> Back to home
@@ -88,7 +72,7 @@
 </main>
 
 <footer class="mt-16 border-t border-outline-variant py-8 text-center text-body-sm text-on-surface-variant">
-  &copy; <span id="yr"></span> AdmissionFinder. Helping you find your academic path.
+  &copy; 2026 AdmissionFinder. Helping you find your academic path.
 </footer>
 
 @section Styles {
@@ -96,7 +80,6 @@
         .inst-card { transition: transform .2s ease, box-shadow .2s ease; }
         .inst-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,.08); }
         .row-hover:hover { background: #eff4ff; }
-        .chip { display:inline-flex; align-items:center; gap:.25rem; padding:.125rem .5rem; border-radius:9999px; font-size:12px; font-weight:600; }
         .bar { height:8px; border-radius:9999px; background:#e5eeff; overflow:hidden; }
         .bar > span { display:block; height:100%; background: linear-gradient(90deg,#0051d5,#316bf3); }
     </style>
@@ -104,130 +87,114 @@
 
 @section Scripts {
     <script>
-        var INSTITUTIONS = [
-            { id:"ui", name:"University of Ibadan", location:"Ibadan, Oyo", type:"Federal",
-              cutoff:230, tuition:"\u20A645,000", acceptance:"18%", ranking:"#1 NG", students:"33,000",
-              programs:["Medicine","Law","Computer Science","Engineering","Business"], match:94, color:"#0051d5" },
-            { id:"unilag", name:"University of Lagos", location:"Akoka, Lagos", type:"Federal",
-              cutoff:220, tuition:"\u20A650,000", acceptance:"22%", ranking:"#2 NG", students:"57,000",
-              programs:["Business","Law","Engineering","Medicine","Computer Science"], match:91, color:"#316bf3" },
-            { id:"oau", name:"Obafemi Awolowo University", location:"Ile-Ife, Osun", type:"Federal",
-              cutoff:215, tuition:"\u20A642,000", acceptance:"25%", ranking:"#3 NG", students:"35,000",
-              programs:["Engineering","Medicine","Law","Computer Science"], match:88, color:"#00b47d" },
-            { id:"cu", name:"Covenant University", location:"Ota, Ogun", type:"Private",
-              cutoff:200, tuition:"\u20A61,200,000", acceptance:"48%", ranking:"#1 Private", students:"11,000",
-              programs:["Business","Computer Science","Engineering"], match:82, color:"#7c3aed" },
-            { id:"abu", name:"Ahmadu Bello University", location:"Zaria, Kaduna", type:"Federal",
-              cutoff:190, tuition:"\u20A638,000", acceptance:"35%", ranking:"#5 NG", students:"60,000",
-              programs:["Medicine","Law","Engineering","Business"], match:78, color:"#dc2626" },
-            { id:"unn", name:"University of Nigeria, Nsukka", location:"Nsukka, Enugu", type:"Federal",
-              cutoff:195, tuition:"\u20A640,000", acceptance:"30%", ranking:"#4 NG", students:"36,000",
-              programs:["Medicine","Law","Business","Engineering"], match:80, color:"#ea580c" },
-        ];
+        (function () {
+            var AF = window.AdmissionFinder;
+            var state = { selected: [] };
 
-        var ROWS = [
-            { key:"type",       label:"Institution type" },
-            { key:"location",   label:"Location" },
-            { key:"cutoff",     label:"JAMB cut-off",     kind:"cutoff" },
-            { key:"tuition",    label:"Tuition (annual)" },
-            { key:"acceptance", label:"Acceptance rate" },
-            { key:"ranking",    label:"National ranking" },
-            { key:"students",   label:"Total students" },
-            { key:"programs",   label:"Popular programs", kind:"chips" },
-            { key:"match",      label:"Your match score", kind:"score" },
-        ];
+            var cards = document.getElementById("cards");
+            var tblHead = document.getElementById("tblHead");
+            var tblBody = document.getElementById("tblBody");
+            var search = document.getElementById("search");
+            var addBtn = document.getElementById("addBtn");
+            var clearAll = document.getElementById("clearAll");
 
-        var state = { selected: ["ui","unilag","oau"] };
+            var ROWS = [
+                { key: "type",       label: "Institution type" },
+                { key: "state",      label: "Location" },
+                { key: "established", label: "Year established" },
+                { key: "accreditation", label: "Accreditation" },
+                { key: "courses",    label: "Courses offered", kind: "count" },
+                { key: "cutoff",     label: "Cut-off (CS)", kind: "cutoff" },
+            ];
 
-        var $ = function(s) { return document.querySelector(s); };
-        var cards = $("#cards"), tblHead = $("#tblHead"), tblBody = $("#tblBody");
-        var search = $("#search"), programFilter = $("#programFilter");
+            function byId(id) { return AF.getInstitution(id); }
 
-        function byId(id) { return INSTITUTIONS.find(function(i) { return i.id === id; }); }
-
-        function render() {
-            cards.innerHTML = "";
-            state.selected.forEach(function(id) {
-                var i = byId(id); if (!i) return;
-                var el = document.createElement("button");
-                el.className = "inst-card text-left bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm hover:border-secondary";
-                el.innerHTML = [
-                    '<div class="flex items-start justify-between mb-3">',
-                    '<div class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold" style="background:' + i.color + '">' + i.name.split(" ").map(function(w) { return w[0]; }).slice(0,2).join("") + '</div>',
-                    '<span class="material-symbols-outlined text-on-surface-variant hover:text-error">close</span>',
-                    '</div>',
-                    '<p class="text-label-md text-primary leading-snug mb-1">' + i.name + '</p>',
-                    '<p class="text-body-sm text-on-surface-variant mb-3">' + i.location + ' \u00B7 ' + i.type + '</p>',
-                    '<div class="flex items-center justify-between">',
-                    '<span class="chip bg-surface-container-high text-primary">Cut-off ' + i.cutoff + '</span>',
-                    '<span class="text-label-md text-tertiary" style="color:#00754a">' + i.match + '% match</span>',
-                    '</div>'
-                ].join("");
-                el.onclick = function() { state.selected = state.selected.filter(function(x) { return x !== id; }); render(); };
-                cards.appendChild(el);
-            });
-            var remaining = 4 - state.selected.length;
-            for (var n = 0; n < remaining; n++) {
-                var slot = document.createElement("div");
-                slot.className = "rounded-xl border-2 border-dashed border-outline-variant p-4 flex flex-col items-center justify-center text-on-surface-variant min-h-[168px]";
-                slot.innerHTML = '<span class="material-symbols-outlined text-3xl mb-1">add_circle</span><span class="text-body-sm">Add an institution</span>';
-                cards.appendChild(slot);
+            function getCutoffForRow(instId) {
+                var c = AF.cutoffs[instId];
+                return c ? (c.cs || c.ee || c.bus || "-") : "-";
             }
 
-            tblHead.innerHTML = '<th class="px-6 py-3 text-label-md text-on-surface-variant sticky left-0 bg-surface-container-low">Attribute</th>' +
-                state.selected.map(function(id) {
-                    var i = byId(id);
-                    return '<th class="px-6 py-3 text-label-md text-primary min-w-[180px]">' + i.name + '</th>';
-                }).join("") +
-                (state.selected.length === 0 ? '<th class="px-6 py-6 text-body-sm text-on-surface-variant italic">No institutions selected</th>' : "");
+            function getCourseCount(instId) {
+                var c = AF.cutoffs[instId];
+                return c ? Object.keys(c).length : 0;
+            }
 
-            tblBody.innerHTML = "";
-            if (state.selected.length === 0) return;
+            function render() {
+                cards.innerHTML = "";
+                state.selected.forEach(function (id) {
+                    var i = byId(id); if (!i) return;
+                    var initials = i.name.split(" ").map(function (w) { return w[0]; }).slice(0, 2).join("");
+                    var el = document.createElement("button");
+                    el.className = "inst-card text-left bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm hover:border-secondary";
+                    el.innerHTML =
+                        '<div class="flex items-start justify-between mb-3">' +
+                        '<div class="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-white font-bold text-sm">' + initials + '</div>' +
+                        '<span class="material-symbols-outlined text-on-surface-variant hover:text-error">close</span>' +
+                        '</div>' +
+                        '<p class="text-label-md text-primary leading-snug mb-1">' + i.name + '</p>' +
+                        '<p class="text-body-sm text-on-surface-variant mb-3">' + i.state + ' &bull; ' + i.type + '</p>' +
+                        '<div class="flex items-center justify-between">' +
+                        '<span class="chip chip-flat">' + getCourseCount(id) + ' courses</span>' +
+                        '<span class="chip ' + (i.accreditation === "Full" ? "chip-up" : "chip-flat") + '">' + i.accreditation + '</span>' +
+                        '</div>';
+                    el.onclick = function () { state.selected = state.selected.filter(function (x) { return x !== id; }); render(); };
+                    cards.appendChild(el);
+                });
 
-            var maxCutoff = Math.max.apply(null, state.selected.map(function(id) { return byId(id).cutoff; }));
+                var remaining = 3 - state.selected.length;
+                for (var n = 0; n < remaining; n++) {
+                    var slot = document.createElement("div");
+                    slot.className = "rounded-xl border-2 border-dashed border-outline-variant p-4 flex flex-col items-center justify-center text-on-surface-variant min-h-[168px]";
+                    slot.innerHTML = '<span class="material-symbols-outlined text-3xl mb-1">add_circle</span><span class="text-body-sm">Add an institution</span>';
+                    cards.appendChild(slot);
+                }
 
-            ROWS.forEach(function(row) {
-                var tr = document.createElement("tr");
-                tr.className = "row-hover border-t border-outline-variant";
-                var cells = state.selected.map(function(id) {
-                    var i = byId(id);
-                    var v = i[row.key];
-                    if (row.kind === "chips") {
-                        return '<td class="px-6 py-4 align-top"><div class="flex flex-wrap gap-1">' + v.map(function(p) { return '<span class="chip bg-surface-container text-primary">' + p + '</span>'; }).join("") + '</div></td>';
-                    }
-                    if (row.kind === "score") {
-                        return '<td class="px-6 py-4 align-middle"><div class="flex items-center gap-3"><div class="bar flex-1"><span style="width:' + v + '%"></span></div><span class="text-label-md text-primary">' + v + '%</span></div></td>';
-                    }
-                    if (row.kind === "cutoff") {
-                        var isMax = v === maxCutoff;
-                        return '<td class="px-6 py-4 align-middle"><span class="text-body-md font-semibold ' + (isMax ? "text-secondary" : "text-primary") + '">' + v + '</span>' + (isMax ? ' <span class="chip bg-secondary-container/10 text-secondary ml-2">Highest</span>' : "") + '</td>';
-                    }
-                    return '<td class="px-6 py-4 align-middle">' + v + '</td>';
-                }).join("");
-                tr.innerHTML = '<td class="px-6 py-4 text-label-md text-on-surface-variant sticky left-0 bg-surface-container-lowest">' + row.label + '</td>' + cells;
-                tblBody.appendChild(tr);
-            });
-        }
+                tblHead.innerHTML = '<th class="px-6 py-3 text-label-md text-on-surface-variant sticky left-0 bg-surface-container-low">Attribute</th>' +
+                    state.selected.map(function (id) {
+                        var i = byId(id);
+                        return '<th class="px-6 py-3 text-label-md text-primary min-w-[180px]">' + i.name + '</th>';
+                    }).join("") +
+                    (state.selected.length === 0 ? '<th class="px-6 py-6 text-body-sm text-on-surface-variant italic">No institutions selected</th>' : "");
 
-        function addFromSearch() {
-            var q = search.value.trim().toLowerCase();
-            var prog = programFilter.value;
-            var found = INSTITUTIONS.find(function(i) {
-                return (!q || i.name.toLowerCase().includes(q)) &&
-                    (!prog || i.programs.includes(prog)) &&
-                    !state.selected.includes(i.id);
-            });
-            if (!found) { alert("No new match. Try a different name or program."); return; }
-            if (state.selected.length >= 4) { alert("You can compare up to 4 institutions."); return; }
-            state.selected.push(found.id);
-            search.value = "";
+                tblBody.innerHTML = "";
+                if (state.selected.length === 0) return;
+
+                ROWS.forEach(function (row) {
+                    var tr = document.createElement("tr");
+                    tr.className = "row-hover border-t border-outline-variant";
+                    var cells = state.selected.map(function (id) {
+                        var i = byId(id);
+                        var v;
+                        if (row.kind === "cutoff") v = getCutoffForRow(id);
+                        else if (row.kind === "count") v = getCourseCount(id);
+                        else v = i[row.key];
+
+                        if (row.kind === "cutoff" && v !== "-") {
+                            return '<td class="px-6 py-4 align-middle"><span class="font-semibold text-primary">' + v + '</span></td>';
+                        }
+                        return '<td class="px-6 py-4 align-middle">' + v + '</td>';
+                    }).join("");
+                    tr.innerHTML = '<td class="px-6 py-4 text-label-md text-on-surface-variant sticky left-0 bg-surface-container-lowest">' + row.label + '</td>' + cells;
+                    tblBody.appendChild(tr);
+                });
+            }
+
+            function addFromSearch() {
+                var q = search.value.trim().toLowerCase();
+                var found = AF.institutions.find(function (i) {
+                    return (!q || i.name.toLowerCase().indexOf(q) >= 0) && state.selected.indexOf(i.id) < 0;
+                });
+                if (!found) { alert("No new match. Try a different name."); return; }
+                if (state.selected.length >= 3) { alert("You can compare up to 3 institutions."); return; }
+                state.selected.push(found.id);
+                search.value = "";
+                render();
+            }
+
+            addBtn.addEventListener("click", addFromSearch);
+            search.addEventListener("keydown", function (e) { if (e.key === "Enter") addFromSearch(); });
+            clearAll.addEventListener("click", function () { state.selected = []; render(); });
             render();
-        }
-
-        document.getElementById("addBtn").addEventListener("click", addFromSearch);
-        search.addEventListener("keydown", function(e) { if (e.key === "Enter") addFromSearch(); });
-        document.getElementById("clearAll").addEventListener("click", function() { state.selected = []; render(); });
-        document.getElementById("yr").textContent = new Date().getFullYear();
-        render();
+        })();
     </script>
 }

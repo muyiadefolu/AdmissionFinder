@@ -1,0 +1,94 @@
+@{
+    ViewData["Title"] = "Institution Profile";
+    ViewData["Description"] = "";
+}
+
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/">Explore schools</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/cutoff">Check cut-off</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/compare">Compare</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/career">Career guide</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/institutions">Institutions</a>
+</div>
+</div>
+</header>
+
+<main class="max-w-container-max mx-auto px-margin-desktop py-10" id="mainContent">
+<div class="text-center py-16">
+<span class="material-symbols-outlined text-5xl text-secondary animate-spin">progress_activity</span>
+<p class="text-body-md text-on-surface-variant mt-4">Loading institution data...</p>
+</div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            var AF = window.AdmissionFinder;
+            var instId = window.location.pathname.split("/").pop();
+            var inst = AF.getInstitution(instId);
+
+            if (!inst) {
+                document.getElementById("mainContent").innerHTML =
+                    '<div class="text-center py-16"><span class="material-symbols-outlined text-6xl text-outline-variant mb-4">error</span>' +
+                    '<h2 class="text-headline-md text-primary mb-2">Institution not found</h2>' +
+                    '<a href="/institutions" class="text-secondary font-semibold">&larr; Back to directory</a></div>';
+                return;
+            }
+
+            var cutoffData = AF.cutoffs[instId] || {};
+            var courseIds = Object.keys(cutoffData);
+            var initials = inst.name.split(" ").map(function (w) { return w[0]; }).slice(0, 2).join("");
+
+            document.getElementById("mainContent").innerHTML =
+                '<a href="/institutions" class="text-secondary font-semibold inline-flex items-center gap-1 mb-6">' +
+                '<span class="material-symbols-outlined text-base">arrow_back</span> Back to institutions</a>' +
+                '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 mb-6">' +
+                '<div class="flex items-start gap-4 mb-4">' +
+                '<div class="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center text-white font-bold text-xl shrink-0">' + initials + '</div>' +
+                '<div><h1 class="text-headline-lg text-primary font-bold">' + inst.name + '</h1>' +
+                '<p class="text-body-md text-on-surface-variant">' + inst.state + ' &bull; ' + inst.type + ' &bull; Est. ' + inst.established + '</p></div></div>' +
+                '<p class="text-body-md text-on-surface mb-4">' + inst.description + '</p>' +
+                '<div class="flex flex-wrap gap-3">' +
+                '<span class="chip ' + (inst.accreditation === "Full" ? "chip-up" : "chip-flat") + '">' + inst.accreditation + ' Accreditation</span>' +
+                '<a href="' + inst.website + '" target="_blank" class="chip chip-flat"><span class="material-symbols-outlined text-sm">open_in_new</span> Visit website</a>' +
+                '</div></div>' +
+                /* Cut-off table */
+                '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden mb-6">' +
+                '<div class="px-6 py-4 border-b border-outline-variant"><h2 class="text-headline-sm text-primary">Cut-off Marks by Course</h2></div>' +
+                '<div class="overflow-x-auto"><table class="w-full text-left text-body-sm">' +
+                '<thead class="bg-surface-container-low text-label-md text-on-surface-variant"><tr>' +
+                '<th class="px-6 py-3">Course</th><th class="px-6 py-3">Cut-off</th><th class="px-6 py-3">Degree</th><th class="px-6 py-3">Duration</th>' +
+                '</tr></thead><tbody>' +
+                (courseIds.length ? courseIds.map(function (cid) {
+                    var course = AF.getCourse(cid);
+                    return '<tr class="border-t border-outline-variant hover:bg-surface-container-low">' +
+                        '<td class="px-6 py-3 font-semibold text-primary">' + (course ? course.name : cid) + '</td>' +
+                        '<td class="px-6 py-3">' + cutoffData[cid] + '</td>' +
+                        '<td class="px-6 py-3">' + (course ? course.degree : "-") + '</td>' +
+                        '<td class="px-6 py-3">' + (course ? course.duration + ' yrs' : "-") + '</td></tr>';
+                }).join("") : '<tr><td colspan="4" class="px-6 py-6 text-center text-on-surface-variant">No course data available</td></tr>') +
+                '</tbody></table></div></div>' +
+                /* Post-UTME info */
+                '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">' +
+                '<h2 class="text-headline-sm text-primary mb-4">Post-UTME Screening</h2>' +
+                '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">' +
+                '<div class="bg-surface-container-low rounded-lg p-4 text-center">' +
+                '<p class="text-label-sm text-on-surface-variant">Format</p><p class="font-bold text-primary">' + inst.postUtme.type + '</p></div>' +
+                '<div class="bg-surface-container-low rounded-lg p-4 text-center">' +
+                '<p class="text-label-sm text-on-surface-variant">Fee</p><p class="font-bold text-primary">' + inst.postUtme.fee + '</p></div>' +
+                '<div class="bg-surface-container-low rounded-lg p-4 text-center">' +
+                '<p class="text-label-sm text-on-surface-variant">Min Score</p><p class="font-bold text-primary">' + inst.postUtme.minScore + '</p></div>' +
+                '<div class="bg-surface-container-low rounded-lg p-4 text-center">' +
+                '<p class="text-label-sm text-on-surface-variant">Status</p><p class="font-bold text-success">Active</p></div></div>' +
+                '<a href="' + inst.postUtme.portal + '" target="_blank" class="inline-block mt-4 bg-secondary text-white px-6 py-2.5 rounded-lg text-label-md hover:bg-primary transition-colors">' +
+                'Visit Registration Portal <span class="material-symbols-outlined text-sm">open_in_new</span></a></div>';
+        })();
+    </script>
+}

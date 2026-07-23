@@ -1,0 +1,154 @@
+@{
+    ViewData["Title"] = "JAMB Subject Combination Guide";
+    ViewData["Description"] = "Check the required JAMB UTME subjects and O'level credits for any course.";
+}
+
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/">Explore schools</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/cutoff">Check cut-off</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/compare">Compare</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/career">Career guide</a>
+</nav>
+</div>
+</div>
+</header>
+
+<main class="max-w-container-max mx-auto px-margin-desktop py-10">
+<div class="mb-8">
+<p class="text-label-md text-secondary uppercase tracking-wide mb-2">Subject Guide</p>
+<h1 class="text-headline-lg md:text-display-md text-primary font-bold mb-3">JAMB Subject Combinations</h1>
+<p class="text-body-lg text-on-surface-variant">Search for any course to see the required UTME subjects and O'level credits.</p>
+</div>
+
+<div class="grid gap-8 lg:grid-cols-5">
+<!-- Course selector -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="space-y-4">
+<div>
+<label class="font-label-md text-label-md text-primary mb-1 block">Select a Course</label>
+<select id="courseSelect" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 font-body-md">
+<option value="">Choose a course...</option>
+</select>
+</div>
+<button id="viewBtn" class="w-full bg-secondary text-white py-3 rounded-lg font-label-md text-label-md hover:bg-primary transition-colors shadow-sm">
+View Requirements
+</button>
+</div>
+
+<!-- Quick list -->
+<div class="mt-6">
+<p class="text-label-sm text-on-surface-variant uppercase tracking-wide mb-3">All Courses</p>
+<div id="courseList" class="space-y-1 max-h-[400px] overflow-y-auto"></div>
+</div>
+</div>
+
+<!-- Result -->
+<div class="lg:col-span-3" id="resultArea">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col items-center justify-center min-h-[400px] text-center">
+<span class="material-symbols-outlined text-6xl text-outline-variant mb-4">menu_book</span>
+<h2 class="text-headline-md text-primary mb-2">Select a course</h2>
+<p class="text-body-md text-on-surface-variant">Choose a course above to see its JAMB subject combination and O'level requirements.</p>
+</div>
+</div>
+</div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            var AF = window.AdmissionFinder;
+            var courseSelect = document.getElementById("courseSelect");
+            var viewBtn = document.getElementById("viewBtn");
+            var resultArea = document.getElementById("resultArea");
+            var courseList = document.getElementById("courseList");
+
+            AF.courses.forEach(function (c) {
+                var opt = document.createElement("option");
+                opt.value = c.id;
+                opt.textContent = c.name + " (" + c.degree + ")";
+                courseSelect.appendChild(opt);
+            });
+
+            courseList.innerHTML = AF.courses.map(function (c) {
+                return '<button class="w-full text-left px-3 py-2 rounded-lg text-body-sm text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors course-opt" data-id="' + c.id + '">' + c.name + '</button>';
+            }).join("");
+
+            document.querySelectorAll(".course-opt").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    courseSelect.value = this.getAttribute("data-id");
+                    showResult(this.getAttribute("data-id"));
+                });
+            });
+
+            function showResult(courseId) {
+                var course = AF.getCourse(courseId);
+                var jamb = AF.jambSubjects[courseId];
+                var olevel = AF.olevelReqs[courseId];
+                var careers = AF.careers[courseId];
+
+                if (!course || !jamb) {
+                    resultArea.innerHTML = '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col items-center justify-center min-h-[400px] text-center"><p class="text-body-md text-on-surface-variant">No data for this course.</p></div>';
+                    return;
+                }
+
+                resultArea.innerHTML =
+                    '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">' +
+                    '<h2 class="text-headline-lg text-primary font-bold mb-1">' + course.name + '</h2>' +
+                    '<p class="text-body-sm text-on-surface-variant mb-6">' + course.degree + ' &bull; ' + course.duration + ' years &bull; ' + course.schoolType + '</p>' +
+
+                    '<div class="grid gap-6 md:grid-cols-2 mb-6">' +
+                    /* JAMB subjects */
+                    '<div class="bg-surface-container-low rounded-xl p-5">' +
+                    '<h3 class="font-headline-sm text-headline-sm text-primary mb-3 flex items-center gap-2"><span class="material-symbols-outlined">quiz</span> JAMB UTME Subjects</h3>' +
+                    '<div class="space-y-2">' +
+                    (jamb.note ? '<p class="text-label-sm text-on-surface-variant mb-2">' + jamb.note + '</p>' : "") +
+                    jamb.compulsory.map(function (s) {
+                        var subjects = [];
+                        if (s.indexOf(" or ") >= 0) {
+                            subjects = s.split(" or ").map(function (x) { return x.trim(); });
+                            return '<div class="flex flex-wrap gap-1"><span class="chip chip-flat">' + subjects.join('</span><span class="text-on-surface-variant text-xs self-center">or</span><span class="chip chip-flat">') + '</span></div>';
+                        }
+                        return '<span class="chip chip-flat">' + s + '</span>';
+                    }).join("<br>") +
+                    (jamb.elective ? '<p class="text-label-sm text-on-surface-variant mt-2">Elective: ' + jamb.elective + '</p>' : "") +
+                    '</div></div>' +
+
+                    /* O'level */
+                    (olevel ? '<div class="bg-surface-container-low rounded-xl p-5">' +
+                    '<h3 class="font-headline-sm text-headline-sm text-primary mb-3 flex items-center gap-2"><span class="material-symbols-outlined">assignment</span> O\'level Requirements</h3>' +
+                    '<p class="text-label-sm text-on-surface-variant mb-2">Credit passes required:</p>' +
+                    '<div class="space-y-1">' +
+                    olevel.credits.map(function (s) { return '<div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-success">check_circle</span><span class="text-body-sm">' + s + '</span></div>'; }).join("") +
+                    (olevel.plus ? '<p class="text-label-sm text-on-surface-variant mt-2">Plus: ' + olevel.plus + '</p>' : "") +
+                    '</div></div>' : "") +
+                    '</div>' +
+
+                    /* Careers */
+                    (careers ? '<div class="bg-surface-container-low rounded-xl p-5">' +
+                    '<h3 class="font-headline-sm text-headline-sm text-primary mb-3 flex items-center gap-2"><span class="material-symbols-outlined">rocket_launch</span> Career Paths</h3>' +
+                    '<div class="space-y-3">' +
+                    careers.map(function (cr) {
+                        return '<div class="flex items-start justify-between"><div><p class="font-semibold text-primary">' + cr.title + '</p><p class="text-label-sm text-on-surface-variant">' + (cr.bodies.length ? cr.bodies.join(", ") : "") + '</p></div>' +
+                            '<div class="text-right"><span class="chip ' + (cr.demand === "High" ? "chip-up" : "chip-flat") + '">' + cr.demand + '</span><p class="text-label-sm text-on-surface-variant mt-1">' + cr.earnings + '</p></div></div>';
+                    }).join("") +
+                    '</div></div>' : "") +
+
+                    '<div class="flex gap-3 mt-4">' +
+                    '<a href="/career?course=' + courseId + '" class="bg-secondary text-white px-5 py-2 rounded-lg text-label-md hover:bg-primary transition-colors">View related careers</a>' +
+                    '<a href="/cutoff" class="border border-outline-variant text-primary px-5 py-2 rounded-lg text-label-md hover:bg-surface-container transition-colors">Check cut-off</a>' +
+                    '</div></div>';
+            }
+
+            viewBtn.addEventListener("click", function () {
+                if (courseSelect.value) showResult(courseSelect.value);
+            });
+            courseSelect.addEventListener("change", function () {
+                if (this.value) showResult(this.value);
+            });
+        })();
+    </script>
+}

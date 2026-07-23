@@ -31,6 +31,30 @@ app.MapControllerRoute(
     pattern: "admin-pulse",
     defaults: new { controller = "Home", action = "AdminPulse" });
 app.MapControllerRoute(
+    name: "recommendations",
+    pattern: "recommendations",
+    defaults: new { controller = "Home", action = "Recommendations" });
+app.MapControllerRoute(
+    name: "institutions",
+    pattern: "institutions",
+    defaults: new { controller = "Home", action = "Institutions" });
+app.MapControllerRoute(
+    name: "institution-detail",
+    pattern: "institution/{id}",
+    defaults: new { controller = "Home", action = "InstitutionDetail" });
+app.MapControllerRoute(
+    name: "cutoff",
+    pattern: "cutoff",
+    defaults: new { controller = "Home", action = "Cutoff" });
+app.MapControllerRoute(
+    name: "subjects",
+    pattern: "subjects",
+    defaults: new { controller = "Home", action = "Subjects" });
+app.MapControllerRoute(
+    name: "career",
+    pattern: "career",
+    defaults: new { controller = "Home", action = "Career" });
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 

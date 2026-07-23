@@ -1,0 +1,172 @@
+@{
+    ViewData["Title"] = "Check Cut-off Marks";
+    ViewData["Description"] = "Check if your JAMB score meets the cut-off mark for a specific institution and course.";
+}
+
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/">Explore schools</a>
+<a class="text-body-md text-secondary font-bold border-b-2 border-secondary pb-1" href="/cutoff">Check cut-off</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/compare">Compare</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/career">Career guide</a>
+</nav>
+</div>
+</div>
+</header>
+
+<main class="max-w-container-max mx-auto px-margin-desktop py-10">
+<div class="mb-8">
+<p class="text-label-md text-secondary uppercase tracking-wide mb-2">Cut-off Checker</p>
+<h1 class="text-headline-lg md:text-display-md text-primary font-bold mb-3">Check your eligibility</h1>
+<p class="text-body-lg text-on-surface-variant">Enter your JAMB score, select an institution and course to see if you meet the cut-off.</p>
+</div>
+
+<div class="grid gap-8 lg:grid-cols-5">
+<!-- Form -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="space-y-4">
+<div>
+<label class="font-label-md text-label-md text-primary mb-1 block">Your JAMB Score</label>
+<input id="scoreInput" type="number" min="0" max="400" placeholder="e.g. 221"
+class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 font-body-md" />
+</div>
+<div>
+<label class="font-label-md text-label-md text-primary mb-1 block">Institution</label>
+<select id="instSelect" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 font-body-md">
+<option value="">Select institution</option>
+</select>
+</div>
+<div>
+<label class="font-label-md text-label-md text-primary mb-1 block">Course</label>
+<select id="courseSelect" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 font-body-md">
+<option value="">Select course</option>
+</select>
+</div>
+<button id="checkBtn" class="w-full bg-secondary text-white py-3 rounded-lg font-label-md text-label-md hover:bg-primary transition-colors shadow-sm">
+Check Eligibility
+</button>
+</div>
+</div>
+
+<!-- Result -->
+<div class="lg:col-span-3" id="resultArea">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col items-center justify-center min-h-[300px] text-center">
+<span class="material-symbols-outlined text-6xl text-outline-variant mb-4">search</span>
+<h2 class="text-headline-md text-primary mb-2">Enter your details</h2>
+<p class="text-body-md text-on-surface-variant">Select an institution and course, then enter your score to check eligibility.</p>
+</div>
+</div>
+</div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            var AF = window.AdmissionFinder;
+            var instSelect = document.getElementById("instSelect");
+            var courseSelect = document.getElementById("courseSelect");
+            var scoreInput = document.getElementById("scoreInput");
+            var checkBtn = document.getElementById("checkBtn");
+            var resultArea = document.getElementById("resultArea");
+
+            // Populate institutions
+            AF.institutions.forEach(function (i) {
+                var opt = document.createElement("option");
+                opt.value = i.id;
+                opt.textContent = i.name + " (" + i.type + ")";
+                instSelect.appendChild(opt);
+            });
+
+            // Populate courses
+            AF.courses.forEach(function (c) {
+                var opt = document.createElement("option");
+                opt.value = c.id;
+                opt.textContent = c.name + " (" + c.degree + ")";
+                courseSelect.appendChild(opt);
+            });
+
+            // Filter courses by selected institution's available courses
+            instSelect.addEventListener("change", function () {
+                var instId = instSelect.value;
+                var available = instId ? Object.keys(AF.cutoffs[instId] || {}) : [];
+
+                // Save current selection
+                var currentCourse = courseSelect.value;
+
+                // Clear and repopulate
+                courseSelect.innerHTML = '<option value="">Select course</option>';
+                AF.courses.forEach(function (c) {
+                    if (available.length === 0 || available.indexOf(c.id) >= 0) {
+                        var opt = document.createElement("option");
+                        opt.value = c.id;
+                        opt.textContent = c.name + " (" + c.degree + ")";
+                        courseSelect.appendChild(opt);
+                    }
+                });
+
+                if (currentCourse) courseSelect.value = currentCourse;
+            });
+
+            function check() {
+                var score = parseInt(scoreInput.value, 10);
+                var instId = instSelect.value;
+                var courseId = courseSelect.value;
+
+                if (!score || !instId || !courseId) {
+                    resultArea.innerHTML =
+                        '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col items-center justify-center min-h-[300px] text-center">' +
+                        '<span class="material-symbols-outlined text-6xl text-outline-variant mb-4">error_outline</span>' +
+                        '<h2 class="text-headline-md text-primary mb-2">Missing information</h2>' +
+                        '<p class="text-body-md text-on-surface-variant">Please fill in all fields above.</p></div>';
+                    return;
+                }
+
+                var inst = AF.getInstitution(instId);
+                var course = AF.getCourse(courseId);
+                var cutoff = AF.getCutoff(instId, courseId);
+
+                if (cutoff === undefined) {
+                    resultArea.innerHTML =
+                        '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col items-center justify-center min-h-[300px] text-center">' +
+                        '<span class="material-symbols-outlined text-6xl text-outline-variant mb-4">database_off</span>' +
+                        '<h2 class="text-headline-md text-primary mb-2">No data available</h2>' +
+                        '<p class="text-body-md text-on-surface-variant">Cut-off data not found for this combination.</p></div>';
+                    return;
+                }
+
+                var diff = score - cutoff;
+                var status, color, icon;
+                if (diff >= 10) { status = "Strong Match"; color = "#00754a"; icon = "verified"; }
+                else if (diff >= 0) { status = "Borderline"; color = "#b45309"; icon = "warning"; }
+                else if (diff >= -10) { status = "Below Cut-off (Close)"; color = "#b45309"; icon = "warning"; }
+                else { status = "Below Cut-off"; color = "#ba1a1a"; icon = "cancel"; }
+
+                var req = AF.olevelReqs[courseId];
+                resultArea.innerHTML =
+                    '<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">' +
+                    '<div class="flex items-center gap-4 mb-6">' +
+                    '<div class="w-16 h-16 rounded-full flex items-center justify-center" style="background:' + color + '20;color:' + color + '">' +
+                    '<span class="material-symbols-outlined text-4xl" style="font-variation-settings:\'FILL\'1">' + icon + '</span></div>' +
+                    '<div><h2 class="text-headline-md text-primary">' + status + '</h2>' +
+                    '<p class="text-body-md text-on-surface-variant">' + inst.name + ' &mdash; ' + course.name + '</p></div></div>' +
+                    '<div class="grid grid-cols-3 gap-4 mb-6">' +
+                    '<div class="bg-surface-container-low rounded-lg p-4 text-center"><p class="text-label-sm text-on-surface-variant">Your Score</p><p class="text-display-md" style="color:' + color + '">' + score + '</p></div>' +
+                    '<div class="bg-surface-container-low rounded-lg p-4 text-center"><p class="text-label-sm text-on-surface-variant">Cut-off</p><p class="text-display-md text-primary">' + cutoff + '</p></div>' +
+                    '<div class="bg-surface-container-low rounded-lg p-4 text-center"><p class="text-label-sm text-on-surface-variant">Difference</p><p class="text-display-md" style="color:' + color + '">' + (diff > 0 ? "+" : "") + diff + '</p></div>' +
+                    '</div>' +
+                    (req ? '<div class="bg-surface-container-low rounded-lg p-4"><p class="text-label-sm text-primary font-semibold mb-1">Required O\'level Credits:</p><p class="text-body-sm text-on-surface-variant">' +
+                    req.credits.join(", ") + (req.plus ? " &mdash; Plus: " + req.plus : "") + '</p></div>' : "") +
+                    '<div class="flex gap-3 mt-4">' +
+                    '<a href="/recommendations?score=' + score + '&olevel=" class="bg-secondary text-white px-5 py-2 rounded-lg text-label-md hover:bg-primary transition-colors">View all matches for ' + score + '</a>' +
+                    '<a href="/institution/' + instId + '" class="border border-outline-variant text-primary px-5 py-2 rounded-lg text-label-md hover:bg-surface-container transition-colors">View institution</a>' +
+                    '</div></div>';
+            }
+
+            checkBtn.addEventListener("click", check);
+            scoreInput.addEventListener("keydown", function (e) { if (e.key === "Enter") check(); });
+        })();
+    </script>
+}

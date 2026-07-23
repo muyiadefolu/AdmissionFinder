@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Recommendations";
+    ViewData["Description"] = "Personalised institution and course recommendations based on your UTME score.";
+}
+
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a href="/" class="text-headline-sm font-bold text-secondary">AdmissionFinder</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-body-md text-secondary font-bold border-b-2 border-secondary pb-1" href="/">Explore schools</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/cutoff">Check cut-off</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/compare">Compare</a>
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/career">Career guide</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-body-md text-on-surface-variant hover:text-secondary" href="/institutions">Institutions</a>
+</div>
+</div>
+</header>
+
+<main class="max-w-container-max mx-auto px-margin-desktop py-10">
+<div id="resultsHeader" class="mb-8">
+<p class="text-label-md text-secondary uppercase tracking-wide mb-2">Recommendations</p>
+<h1 class="text-headline-lg md:text-display-md text-primary font-bold mb-3">Your personalised matches</h1>
+<p id="resultsSummary" class="text-body-lg text-on-surface-variant">Loading recommendations...</p>
+</div>
+
+<!-- Filters -->
+<div class="flex flex-wrap gap-3 mb-6 items-center">
+<select id="typeFilter" class="py-2 px-3 rounded-lg border border-outline-variant bg-surface text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40">
+<option value="">All institution types</option>
+<option>Federal</option>
+<option>State</option>
+<option>Private</option>
+<option>Polytechnic</option>
+<option>College of Education</option>
+</select>
+<select id="statusFilter" class="py-2 px-3 rounded-lg border border-outline-variant bg-surface text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40">
+<option value="">All statuses</option>
+<option>Strong Match</option>
+<option>Borderline</option>
+</select>
+<span id="countBadge" class="text-label-sm text-on-surface-variant ml-auto"></span>
+</div>
+
+<!-- Results Grid -->
+<div id="resultsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+<div id="emptyState" class="hidden text-center py-16">
+<span class="material-symbols-outlined text-6xl text-outline-variant mb-4">search_off</span>
+<h2 class="text-headline-md text-primary mb-2">No matches found</h2>
+<p class="text-body-md text-on-surface-variant">Try adjusting your score or check the cut-off checker for specific institutions.</p>
+<a href="/" class="inline-block mt-4 bg-secondary text-white px-6 py-2 rounded-lg text-label-md hover:bg-primary">Back to Home</a>
+</div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var score = parseInt(params.get("score"), 10);
+            var olevelStr = params.get("olevel") || "";
+            var olevel = olevelStr.split(",").map(function (s) { return s.trim(); }).filter(function (s) { return s; });
+
+            if (!score) {
+                document.getElementById("resultsSummary").textContent = "No score provided. Enter your score on the home page.";
+                return;
+            }
+
+            var AF = window.AdmissionFinder;
+            var results = AF.recommend(score, olevel);
+
+            document.getElementById("resultsSummary").textContent =
+                "Score: " + score + " — Found " + results.length + " possible matches. " +
+                (olevel.length ? "O'level: " + olevel.join(", ") : "");
+
+            function render(filterType, filterStatus) {
+                var filtered = results.filter(function (r) {
+                    if (filterType && r.institution.type !== filterType) return false;
+                    if (filterStatus === "Strong Match" && r.status !== "Strong Match") return false;
+                    if (filterStatus === "Borderline" && r.status.indexOf("Borderline") < 0 && r.status.indexOf("Below") < 0) return false;
+                    return true;
+                });
+
+                var grid = document.getElementById("resultsGrid");
+                var empty = document.getElementById("emptyState");
+                var badge = document.getElementById("countBadge");
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = "";
+                    empty.classList.remove("hidden");
+                    badge.textContent = "";
+                    return;
+                }
+                empty.classList.add("hidden");
+                badge.textContent = "Showing " + filtered.length + " of " + results.length;
+
+                grid.innerHTML = filtered.map(function (r) {
+                    return AF.ui.renderCard(r);
+                }).join("");
+            }
+
+            var typeFilter = document.getElementById("typeFilter");
+            var statusFilter = document.getElementById("statusFilter");
+
+            typeFilter.addEventListener("change", function () {
+                render(typeFilter.value, statusFilter.value);
+            });
+            statusFilter.addEventListener("change", function () {
+                render(typeFilter.value, statusFilter.value);
+            });
+
+            render("", "");
+        })();
+    </script>
+}
